@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.snpc.mybatispostgres.repo.ProductMapper">
+
+<!--    <resultMap id="ProductResultMap" type="com.snpc.mybatispostgres.entity.Product">-->
+<!--        <id column="id" property="id" />-->
+<!--        <result column="first_name" property="firstName" />-->
+<!--        <result column="last_name" property="lastName" />-->
+<!--        <result column="email_address" property="emailId" />-->
+<!--    </resultMap>-->
+
+    <sql id="base_all_column">
+        *
+    </sql>
+
+    <select id="findAll" resultType="com.snpc.mybatispostgres.entity.Product">
+        select
+        <include refid="base_all_column"/>
+        from webshop.products
+    </select>
+    <select id="exist" resultType="Boolean" parameterType="Integer">
+        SELECT EXISTS(SELECT 1 FROM webshop.products WHERE id = #{id})
+    </select>
+    <select id="findById" resultType="com.snpc.mybatispostgres.entity.Product" parameterType="Integer">
+        select
+        <include refid="base_all_column"/>
+        from webshop.products
+        where id = #{id}
+    </select>
+
+    <select id="findAllDynamic"  parameterType="com.snpc.mybatispostgres.entity.Product" resultType="com.snpc.mybatispostgres.entity.Product">
+        select
+        <include refid="base_all_column"/>
+        from webshop.products
+        where
+            1 = 1
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="labelId != null">
+                and labelid = #{labelId}
+            </if>
+            <if test="category != null">
+                and category = #{category}::"category"
+            </if>
+            <if test="gender != null ">
+                and gender = #{gender}::"gender"
+            </if>
+            <if test="currentlyActive != null">
+                and currentlyactive = #{currentlyActive}
+            </if>
+    </select>
+
+    <select id="insert" parameterType="com.snpc.mybatispostgres.entity.Product" resultType="com.snpc.mybatispostgres.entity.Product">
+        insert into webshop.products( name, labelid, category , gender , currentlyactive , updated)
+        values(
+            #{name},
+            #{labelId},
+            #{category}::"category",
+            #{gender}::"gender",
+            #{currentlyActive},
+            CURRENT_TIMESTAMP AT TIME ZONE 'GMT')
+        returning *
+    </select>
+
+    <select id="update" parameterType="com.snpc.mybatispostgres.entity.Product" resultType="com.snpc.mybatispostgres.entity.Product" >
+        update webshop.products
+        set
+            updated = current_timestamp at time zone 'GMT'
+            <if test="name != null and name != ''">
+                , name = #{name}
+            </if>
+            <if test="labelId != null">
+                , labelid = #{labelId}
+            </if>
+            <if test="category != null">
+                , category = #{category}::"category"
+            </if>
+            <if test="gender != null ">
+                , gender = #{gender}::"gender"
+            </if>
+            <if test="currentlyActive != null">
+                , currentlyactive = #{currentlyActive}
+            </if>
+        where id = #{id}
+        returning *
+    </select>
+
+    <delete id="delete" parameterType="Integer">
+        delete from webshop.products
+        where id = #{id} ;
+    </delete>
+</mapper>
